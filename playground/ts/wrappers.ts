@@ -44,20 +44,19 @@ export interface AdvanceResult {
   tokens: TokenId[];
 }
 
-export class ConstraintWrapper {
-  constructor(public constraint: Constraint) {
+export class Sequence {
+  tokens: TokenId[] = [];
+
+  constructor(prompt: Uint32Array, public constraint: Constraint) {
+    this.flush();
+    const newTokens = this.constraint.process_prompt(prompt);
+    this.tokens = Array.from(newTokens);
     this.flush();
   }
 
   private flush() {
     const logs = this.constraint.get_and_clear_logs();
     console.log(logs);
-  }
-
-  processPrompt(prompt: Uint32Array): Uint32Array {
-    const r = this.constraint.process_prompt(prompt);
-    this.flush();
-    return r;
   }
 
   getResults(): api.ParserOutput[] {

@@ -4,7 +4,7 @@ import { grm, gen, GrammarNode } from "guidance-ts";
 import {
   constraintConfig,
   ConstraintSettings,
-  ConstraintWrapper,
+  Sequence,
   JsTokenizer,
 } from "./wrappers.js";
 
@@ -30,9 +30,30 @@ export class NodeLlamaCppModel implements JsTokenizer {
     this.config = constraintConfig(this, settings);
   }
 
-  constraint(grammar: GrammarNode): ConstraintWrapper {
+  seq(prompt: string, grammar: GrammarNode): Sequence {
     const c = this.config.new_constraint(JSON.stringify(grammar.serialize()));
-    return new ConstraintWrapper(c);
+    return new Sequence(this.tokenize(prompt), c);
+  }
+
+  async nextToken(seq: Sequence): Promise<boolean> {
+    const tokenMask = seq.samplingMask();
+    if (tokenMask === undefined) {
+      return false;
+    }
+    const temperature = seq.temperature;
+    const tok = await this.modelIface.nextToken(new Uint32Array(seq.tokens), {
+      temperature,
+      tokenMask,
+    });
+    const res = seq.advanceParser(tok);
+    if (res.stop) {
+      return false;
+    }
+    if (res.backtrack) {
+      seq.tokens.splice(-res.backtrack, res.backtrack);
+    }
+    seq.tokens.push(...res.tokens);
+    return true;
   }
 
   nVocab(): number {
@@ -52,7 +73,7 @@ export class NodeLlamaCppModel implements JsTokenizer {
   }
 }
 
-export function main() {
+export async function main() {
   const model = new NodeLlamaCppModel(
     {
       modelPath:
@@ -60,9 +81,14 @@ export function main() {
     },
     { console_log_level: 0, buffer_log_level: 2 }
   );
-  const c = model.constraint(
+  const seq = model.seq(
+    "",
     grm`2 + 2 = ${gen(/\d+/)} and 3 + 3 = ${gen(/\d+/)}\n`
   );
+  while (await model.nextToken(seq)) {
+    console.log(seq.getResults());
+  }
+
   console.log("Hello, TypeScript!");
 }
 
