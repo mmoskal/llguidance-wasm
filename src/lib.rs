@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use llguidance_parser::{
     api::TopLevelGrammar,
+    output::{ParserOutput, Reporter},
     toktrie::{InferenceCapabilities, StepArg, TokEnv, TokRxInfo, TokTrie, TokenId, TokenizerEnv},
     Logger, TokenParser,
 };
@@ -149,9 +150,11 @@ impl ConstraintConfig {
         )
         .map_err(js_err)?;
         Ok(Constraint {
+            reporter: Reporter::new(&parser),
             parser,
             temperature: 0.0,
             step_arg: StepArg::empty(),
+            progress: Vec::new(),
         })
     }
 }
@@ -161,6 +164,8 @@ pub struct Constraint {
     parser: TokenParser,
     pub temperature: f32,
     step_arg: StepArg,
+    reporter: Reporter,
+    progress: Vec<ParserOutput>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -184,8 +189,24 @@ impl Constraint {
         }
     }
 
+    fn flush_progress(&mut self, gen: bool, stop: bool) {
+        self.reporter.set_is_generated(gen);
+        let progress = self.reporter.get_progress_core(&mut self.parser);
+        self.progress.extend(progress);
+        if stop {
+            self.progress
+                .push(self.reporter.final_text(&mut self.parser));
+        }
+    }
+
     pub fn get_and_clear_logs(&mut self) -> String {
         let r = self.parser.logger.get_and_clear_logs();
+        r
+    }
+
+    pub fn get_and_clear_results(&mut self) -> String {
+        let r = serde_json::to_string(&self.progress).unwrap();
+        self.progress.clear();
         r
     }
 
@@ -194,6 +215,7 @@ impl Constraint {
 
         let arg = std::mem::replace(&mut self.step_arg, StepArg::empty());
         let r = self.parser.mid_process(arg);
+        self.flush_progress(false, r.is_stop());
         self.check_error()?;
 
         if let Some(t) = r.temperature {
@@ -225,7 +247,9 @@ impl Constraint {
             sampled: Some(sampled),
         };
 
-        let r = match self.parser.advance_parser(arg) {
+        let pres = self.parser.advance_parser(arg);
+        let stop = pres.is_none();
+        let r = match pres {
             None => AdvanceResult {
                 stop: true,
                 backtrack: 0,
@@ -237,6 +261,7 @@ impl Constraint {
                 tokens: r.ff_tokens,
             },
         };
+        self.flush_progress(true, stop);
 
         self.check_error()?;
 
