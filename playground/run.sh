@@ -10,6 +10,10 @@ ln -s ../../pkg llguidance-wasm
 ln -s ../../../node-llama-cpp .
 cd ..
 
+cd ..
+wasm-pack build --target nodejs --no-opt
+cd playground
+
 echo "Building..."
 ./node_modules/.bin/tsc 
 echo "Running..."

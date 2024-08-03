@@ -31,7 +31,7 @@ extern "C" {
     fn tokenize(this: &JsTokenizer, text: &str) -> Vec<u32>;
 }
 
-pub struct JsTokenizerEnv {
+struct JsTokenizerEnv {
     js_tok: JsTokenizer,
     trie: TokTrie,
 }
@@ -45,15 +45,15 @@ unsafe impl Send for JsTokenizerEnv {}
 unsafe impl Sync for JsTokenizerEnv {}
 
 #[wasm_bindgen]
-impl JsTokenizerEnv {
+impl JsTokEnv {
     pub fn build(tok: JsTokenizer) -> JsTokEnv {
         console_error_panic_hook::set_once();
         JsTokEnv {
-            tok_env: Arc::new(JsTokenizerEnv::new(tok)),
+            tok_env: Arc::new(Self::new(tok)),
         }
     }
 
-    fn new(js_tok: JsTokenizer) -> Self {
+    fn new(js_tok: JsTokenizer) -> JsTokenizerEnv {
         let mut words = Vec::new();
         let mut idx = 0;
         let info = js_tok.tokenInfo();
@@ -81,7 +81,7 @@ impl JsTokenizerEnv {
             },
             &words,
         );
-        Self { js_tok, trie }
+        JsTokenizerEnv { js_tok, trie }
     }
 }
 
@@ -182,6 +182,11 @@ impl Constraint {
         } else {
             Ok(())
         }
+    }
+
+    pub fn get_and_clear_logs(&mut self) -> String {
+        let r = self.parser.logger.get_and_clear_logs();
+        r
     }
 
     pub fn sampling_mask(&mut self) -> JsResult<Option<Vec<u32>>> {
