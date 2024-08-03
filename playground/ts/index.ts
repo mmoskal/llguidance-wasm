@@ -8,11 +8,14 @@ import {
   JsTokenizer,
 } from "./wrappers.js";
 
+const TOKENIZER_PREFIX = "\x02";
+
 export class NodeLlamaCppModel implements JsTokenizer {
   modelIface: ModelIface;
   tokInfo: TokenizerInfo;
   tokInfoBytes: Uint8Array;
   config: ConstraintConfig;
+  tokenizerPrefixTokens: number[];
 
   constructor(options: LlamaModelOptions, settings?: ConstraintSettings) {
     this.modelIface = new ModelIface(options);
@@ -28,6 +31,7 @@ export class NodeLlamaCppModel implements JsTokenizer {
     }
     this.tokInfoBytes = new Uint8Array(res);
     this.config = constraintConfig(this, settings);
+    this.tokenizerPrefixTokens = Array.from(this.tokenize(TOKENIZER_PREFIX));
   }
 
   seq(prompt: string, grammar: GrammarNode): Sequence {
@@ -71,6 +75,15 @@ export class NodeLlamaCppModel implements JsTokenizer {
   tokenize(text: string): Uint32Array {
     return this.modelIface.tokenize(text);
   }
+  tokenizeExact(text: string): Uint32Array {
+    const r = this.tokenize(TOKENIZER_PREFIX + text);
+    for (let i = 0; i < this.tokenizerPrefixTokens.length; i++) {
+      if (r[i] !== this.tokenizerPrefixTokens[i]) {
+        throw new Error("Tokenization mismatch");
+      }
+    }
+    return r.slice(this.tokenizerPrefixTokens.length);
+  }
 }
 
 export async function main() {
@@ -83,10 +96,14 @@ export async function main() {
   );
   const seq = model.seq(
     "",
-    grm`2 + 2 = ${gen(/\d+/)} and 3 + 3 = ${gen(/\d+/)}\n`
+    grm`Q: 2 + 2 =\nA: ${gen(/\d+/)}\nQ: 3 + 3 =\nA: ${gen(/\d+/)}\n`
   );
+  let maxTokens = 15;
   while (await model.nextToken(seq)) {
     console.log(seq.getResults());
+    if(maxTokens-- <= 0) {
+      break;
+    }
   }
 
   console.log("Hello, TypeScript!");

@@ -29,7 +29,7 @@ extern "C" {
     fn tokenInfo(this: &JsTokenizer) -> Vec<u8>;
 
     #[wasm_bindgen(method)]
-    fn tokenize(this: &JsTokenizer, text: &str) -> Vec<u32>;
+    fn tokenizeExact(this: &JsTokenizer, text: &str) -> Vec<u32>;
 }
 
 struct JsTokenizerEnv {
@@ -97,7 +97,7 @@ impl TokenizerEnv for JsTokenizerEnv {
 
     fn tokenize_bytes(&self, s: &[u8]) -> Vec<TokenId> {
         self.trie
-            .tokenize_with_greedy_fallback(s, |s| self.js_tok.tokenize(s))
+            .tokenize_with_greedy_fallback(s, |s| self.js_tok.tokenizeExact(s))
     }
 }
 
@@ -249,7 +249,7 @@ impl Constraint {
 
         let pres = self.parser.advance_parser(arg);
         let stop = pres.is_none();
-        let r = match pres {
+        let mut r = match pres {
             None => AdvanceResult {
                 stop: true,
                 backtrack: 0,
@@ -270,6 +270,13 @@ impl Constraint {
             tokens: r.tokens.clone(),
             sampled: None,
         };
+
+        if r.backtrack == 0 {
+            r.tokens.insert(0, sampled);
+        } else {
+            // otherwise, ignore the sampled token
+            r.backtrack -= 1;
+        }
 
         Ok(serde_json::to_string(&r)?)
     }

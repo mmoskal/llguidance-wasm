@@ -33,7 +33,7 @@ export interface JsTokenizer {
   eosToken(): number;
   bosToken(): number;
   tokenInfo(): Uint8Array;
-  tokenize(text: string): Uint32Array;
+  tokenizeExact(text: string): Uint32Array;
 }
 
 export type TokenId = number;
