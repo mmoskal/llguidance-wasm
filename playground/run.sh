@@ -12,7 +12,7 @@ ln -s ../../../guidance-ts .
 cd ..
 
 cd ..
-wasm-pack build --target nodejs --no-opt
+wasm-pack build --target nodejs --no-opt --release
 cd playground
 
 echo "Building..."
