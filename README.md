@@ -8,3 +8,4 @@ or in node.js using WebAssembly.
 - https://github.com/madonoharu/tsify
 - https://github.com/sigoden/wasm-pkg-build
 - https://stackoverflow.com/questions/71217860/how-to-call-an-async-javascript-import-function-from-webassembly-rust-in-a-nod
+- https://github.com/explainers-by-googlers/prompt-api
