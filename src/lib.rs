@@ -46,6 +46,7 @@ unsafe impl Sync for JsTokenizerEnv {}
 impl JsTokEnv {
     pub fn build(tok: JsTokenizer) -> JsTokEnv {
         console_error_panic_hook::set_once();
+        console_log::init_with_level(log::Level::Debug).unwrap();
         JsTokEnv {
             tok_env: Arc::new(Self::new(tok)),
         }
@@ -72,6 +73,19 @@ impl JsTokEnv {
             words.push(word);
             idx += 2 + len;
         }
+        let vocab_size = js_tok.vocabSize() as usize;
+        if vocab_size > words.len() {
+            let to_add = vocab_size - words.len();
+            log::info!("jstokenizer: adding {} empty tokens", to_add);
+            for _ in 0..to_add {
+                words.push(Vec::new());
+            }
+        }
+        log::info!(
+            "making tokenizer: words={} vocab={}",
+            words.len(),
+            js_tok.vocabSize()
+        );
         let trie = TokTrie::from(
             &TokRxInfo {
                 vocab_size: js_tok.vocabSize(),
