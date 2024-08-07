@@ -5,14 +5,20 @@ cd $(dirname $0)
 set -e
 test -d node_modules || yarn install
 cd node_modules
-rm -f llguidance-wasm node-llama-cpp guidance-ts
+rm -f llguidance-wasm guidance-ts window-ai-ll-polyfill
 ln -s ../../pkg llguidance-wasm
-ln -s ../../../guidance-ts .
+ln -s ../../../guidance-ts guidance-ts
+ln -s ../../../web-llm window-ai-ll-polyfill
 cd ..
 
 cd ..
 wasm-pack build --target web --no-opt --release
 cd site
+
+cd www
+rm -f *.wasm
+ln -s ../../pkg/llguidance_wasm_bg.wasm .
+cd ..
 
 echo "Building..."
 

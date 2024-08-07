@@ -4,9 +4,6 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "dependencies": {
-    "@mlc-ai/web-llm": "^0.2.53"
-  },
   "devDependencies": {
     "esbuild": "^0.23.0",
     "typescript": "^5.5.4"
@@ -16,5 +13,8 @@
   },
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "@mlc-ai/web-llm": "^0.2.53"
+  }
 }

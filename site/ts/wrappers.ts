@@ -29,9 +29,8 @@ export interface ConstraintSettings {
 }
 
 export interface JsTokenizer {
-  nVocab(): number;
-  eosToken(): number;
-  bosToken(): number;
+  vocabSize: number;
+  eosToken: number;
   tokenInfo(): Uint8Array;
   tokenizeExact(text: string): Uint32Array;
 }
@@ -44,14 +43,17 @@ export interface AdvanceResult {
   tokens: TokenId[];
 }
 
-export class Sequence {
-  tokens: TokenId[] = [];
+export class LLConstraint {
+  constructor(public constraint: Constraint) {
+    this.flush();
+  }
 
-  constructor(prompt: Uint32Array, public constraint: Constraint) {
+  processPrompt(prompt?: ArrayLike<number>) {
+    const tokens = this.constraint.process_prompt(
+      Uint32Array.from(prompt ?? [])
+    );
     this.flush();
-    const newTokens = this.constraint.process_prompt(prompt);
-    this.tokens = Array.from(newTokens);
-    this.flush();
+    return tokens;
   }
 
   private flush() {

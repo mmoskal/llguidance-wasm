@@ -13,15 +13,12 @@ use wasm_bindgen::prelude::*;
 extern "C" {
     pub type JsTokenizer;
 
-    #[wasm_bindgen(method)]
-    fn nVocab(this: &JsTokenizer) -> u32;
+    #[wasm_bindgen(method, getter)]
+    fn vocabSize(this: &JsTokenizer) -> u32;
 
     // -1 if absent
-    #[wasm_bindgen(method)]
+    #[wasm_bindgen(method, getter)]
     fn eosToken(this: &JsTokenizer) -> i32;
-
-    #[wasm_bindgen(method)]
-    fn bosToken(this: &JsTokenizer) -> i32;
 
     // format:
     // [flags0, len0, byte0_0, byte0_1, ..., flags1, len1, byte1_0, byte1_1, ...]
@@ -77,7 +74,7 @@ impl JsTokEnv {
         }
         let trie = TokTrie::from(
             &TokRxInfo {
-                vocab_size: js_tok.nVocab() as u32,
+                vocab_size: js_tok.vocabSize(),
                 tok_eos: js_tok.eosToken() as u32,
             },
             &words,
