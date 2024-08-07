@@ -15,6 +15,13 @@ wasm-pack build --target web --no-opt --release
 cd site
 
 echo "Building..."
-./node_modules/.bin/tsc 
-echo "Running..."
-node dist/index.js
+
+ESBUILD="./node_modules/.bin/esbuild
+    ./ts/index.ts
+    --bundle --outfile=./www/bundle.js --format=esm --sourcemap"
+
+$ESBUILD
+
+$ESBUILD \
+    --serve=8042 \
+    --servedir=www

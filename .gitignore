@@ -4,3 +4,5 @@ pkg/
 wasm-pack.log
 node_modules
 dist
+site/www/bundle.js
+site/www/bundle.js.map

@@ -75,5 +75,3 @@ function logProbs(l: Float32Array, mask: Uint32Array): Float32Array {
   }
   return l;
 }
-
-main();
