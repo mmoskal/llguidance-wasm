@@ -7,12 +7,37 @@ import {
   JsTokenizer,
 } from "./wrappers.js";
 
-
+import * as webllm from "@mlc-ai/web-llm";
+import { append, mkElt, rootElt, setProgress } from "./chtml.js";
 
 export async function main() {
   testLogProbs();
 
-  console.log("Hello, TypeScript!");
+  setProgress("Loading model...");
+
+  const engine = await webllm.CreateMLCEngine(
+    "Phi-3-mini-4k-instruct-q4f16_1-MLC",
+    {
+      initProgressCallback: (progress) => {
+        setProgress(progress.text);
+        console.log(progress);
+      },
+    }
+  );
+
+  const messages: webllm.ChatCompletionMessageParam[] = [
+    { role: "system", content: "You are a helpful AI assistant." },
+    { role: "user", content: "Hello!" },
+  ];
+
+  const reply = await engine.chat.completions.create({
+    messages,
+  });
+
+  append(rootElt(), mkElt("div response", reply.choices[0].message.content));
+
+  console.log(reply.choices[0].message);
+  console.log(reply.usage);
 }
 
 function testLogProbs() {

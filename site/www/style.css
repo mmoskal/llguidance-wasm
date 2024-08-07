@@ -1,0 +1,10 @@
+body {
+    margin: 20px auto;
+    max-width: 1024px;
+    position: relative;
+    min-height: 100vh;
+}
+
+.error {
+    color: red;
+}

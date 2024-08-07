@@ -122,6 +122,13 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.23.0.tgz#db44a6a08520b5f25bbe409f34a59f2d4bcc7ced"
   integrity sha512-Arm+WgUFLUATuoxCJcahGuk6Yj9Pzxd6l11Zb/2aAuv5kWWvvfhLFo2fni4uSK5vzlUdCGZ/BdV5tH8klj8p8g==
 
+"@mlc-ai/web-llm@^0.2.53":
+  version "0.2.53"
+  resolved "https://registry.yarnpkg.com/@mlc-ai/web-llm/-/web-llm-0.2.53.tgz#bc4975889a1af9aa5a7f15bcfc162cc9d2d1db71"
+  integrity sha512-GkMAzr6tddER/T1+giPvJOatLrpUqMP3phrvIsVUrilUXlJ92jzrLqcWJEKJww5vom1OPKcvGdH3yB0IsCqLow==
+  dependencies:
+    loglevel "^1.9.1"
+
 esbuild@^0.23.0:
   version "0.23.0"
   resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.23.0.tgz#de06002d48424d9fdb7eb52dbe8e95927f852599"
@@ -151,6 +158,11 @@ esbuild@^0.23.0:
     "@esbuild/win32-arm64" "0.23.0"
     "@esbuild/win32-ia32" "0.23.0"
     "@esbuild/win32-x64" "0.23.0"
+
+loglevel@^1.9.1:
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/loglevel/-/loglevel-1.9.1.tgz#d63976ac9bcd03c7c873116d41c2a85bafff1be7"
+  integrity sha512-hP3I3kCrDIMuRwAwHltphhDM1r8i55H33GgqjXbrisuJhF4kRhW1dNuxsRklp4bXl8DSdLaNLuiL4A/LWRfxvg==
 
 typescript@^5.5.4:
   version "5.5.4"
