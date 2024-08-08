@@ -9,20 +9,23 @@
   </head>
   <body>
     <div id="app">
-      <h1>
-        llguidance-wasm demo
-      </h1>
+      <h1>llguidance-wasm demo</h1>
       <p>
         This website will load phi-3 mini model (2.1GB), store it in browser
-        cache, and then generate text based on the provided grammar.
-        It uses <a href="https://github.com/microsoft/llguidance">Low-level Guidance</a>
-        library compiled to WebAssembly and a bunch of <a href="https://github.com/mmoskal/llguidance-wasm">glue code</a>.
+        cache, and then generate text based on the provided grammar. It uses
+        <a href="https://github.com/microsoft/llguidance"
+          >Low-level Guidance (llguidance)</a
+        >
+        library compiled to WebAssembly and a bunch of
+        <a href="https://github.com/mmoskal/llguidance-wasm">glue code</a>. The
+        llguidance grammars are generated from TypeScript/JavaScript
+        code via <a href="https://github.com/mmoskal/guidance-ts">guidance-ts</a>
+        library.
       </p>
       <p>
-        To simulate APIs that are not yet available in the browser,
-        the site uses <a href="https://github.com/mlc-ai/web-llm">WebLLM</a>.
-        WebLLM requires a GPU exposed via WebGPU. So far I have tested
-        Edge on Mac M1.
+        To simulate APIs that are not yet available in the browser, the site
+        uses <a href="https://github.com/mlc-ai/web-llm">WebLLM</a>. WebLLM
+        requires a GPU exposed via WebGPU. So far I have tested Edge on Mac M1.
       </p>
       <form class="pure-form pure-form-stacked">
         <fieldset>
@@ -46,8 +49,10 @@
               placeholder="grm`...`"
             ></textarea>
             <span class="pure-form-message"
-              >It will be eval()ed. You can use gen() and select()
-              functions. <a href="https://github.com/mmoskal/guidance-ts">More info</a></span
+              >It will be eval()ed. You can use gen() and select() functions.
+              <a href="https://github.com/mmoskal/guidance-ts"
+                >More info</a
+              ></span
             >
           </div>
 
