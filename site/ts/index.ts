@@ -214,12 +214,6 @@ function loadExample(ex: Example) {
 
 const examples = [
   {
-    name: "Math",
-    user: "Let's do some math!",
-    grammar:
-      "return grm`2 + 2 = ${gen(/[0-9]+/)}! and 3 + 3 = ${gen(/[0-9]+/)}!`",
-  },
-  {
     name: "JSON",
     user: "Please give me a JSON object.",
     grammar: `const item = gen("item", { listAppend: true, stop: '"' });
@@ -236,5 +230,12 @@ return grm\`
   "strength": \${gen("strength", /[0-9]+/, { stop: "," })},
   "items": ["\${item}", "\${item}", "\${item}"]
 }\``,
+  },
+
+  {
+    name: "Math",
+    user: "Let's do some math!",
+    grammar:
+      "return grm`2 + 2 = ${gen(/[0-9]+/)}! and 3 + 3 = ${gen(/[0-9]+/)}!`",
   },
 ];
