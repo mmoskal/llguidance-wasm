@@ -29,6 +29,11 @@ export class WaiSequence extends Generation {
   private tokens: number[];
   private ptr = 0;
 
+  ffTokens = 0;
+  sampledTokens = 0;
+  genTime = 0;
+  prefillTime = 0;
+
   constructor(
     private seq: webllm.AISequence,
     private ll: LLConstraint,
@@ -53,6 +58,10 @@ export class WaiSequence extends Generation {
   }
 
   private async advance() {
+    const t0 = performance.now();
+    const isPrefill = this.ffTokens == 0;
+    this.ffTokens += this.tokens.length - this.ptr;
+    this.sampledTokens += 1;
     const adv = this.seq.advance(this.tokens.slice(this.ptr), 0);
     this.ptr = this.tokens.length;
     const mask = this.ll.samplingMask();
@@ -70,7 +79,24 @@ export class WaiSequence extends Generation {
     for (const res of this.ll.getResults()) {
       this.handleParserOutput(res);
     }
+    if (isPrefill) {
+      this.prefillTime += performance.now() - t0;
+    } else {
+      this.genTime += performance.now() - t0;
+    }
     return !r.stop;
+  }
+
+  getStats() {
+    const saved = Math.max(0, this.ffTokens - this.sampledTokens);
+    const seconds = this.genTime / 1000;
+    const tps = (this.sampledTokens - 1) / seconds;
+    const prefill = this.prefillTime / 1000;
+    return `Tokens: ${
+      this.sampledTokens
+    } + ${saved} saved, generation: ${tps.toFixed(
+      1
+    )} t/s; prefill ${prefill.toFixed(3)} s`;
   }
 }
 
@@ -105,6 +131,10 @@ export class WaiModel {
         fork: false,
       }
     );
+  }
+
+  getStats() {
+    return this.ai._engine.pipeline.curRoundRuntimeStatsText();
   }
 
   async generation(options: GenerationOptions): Promise<WaiSequence> {
@@ -178,16 +208,13 @@ async function generate() {
       append(elt("output"), e);
     };
     await seq.run();
+    elt("stats").textContent = seq.getStats();
   } finally {
     seq.destroy();
   }
 }
 
-export async function main() {
-  loadExample(examples[0]);
-  setError("");
-  setProgress("");
-
+async function checkWebGPU() {
   const webgpuReport =
     "Please visit <a href='https://webgpureport.org/'>webgpureport.org</a> to check your system's compatibility.";
   if (typeof navigator !== "undefined" && navigator.gpu !== void 0) {
@@ -198,14 +225,23 @@ export async function main() {
       setError({
         html: "Unable to find a compatible GPU. " + webgpuReport,
       });
-      return;
+      return false;
     }
   } else {
     setError({
       html: "WebGPU not supported. " + webgpuReport,
     });
-    return;
+    return false;
   }
+  return true;
+}
+
+export async function main() {
+  loadExample(examples[0]);
+  setError("");
+  setProgress("");
+
+  if (!(await checkWebGPU())) return;
 
   setProgress("Press 'Generate' to download model and generate text.");
   for (const ex of examples) {
@@ -260,5 +296,12 @@ return grm\`
     user: "Let's do some math!",
     grammar:
       "return grm`2 + 2 = ${gen(/[0-9]+/)}! and 3 + 3 = ${gen(/[0-9]+/)}!`",
+  },
+
+  {
+    name: "Poem",
+    user: "Write a poem about shouting",
+    grammar:
+      "return grm`${gen(/[a-z \\n]+/, { stop: 'the end', temperature: 0.8 })}`",
   },
 ];
