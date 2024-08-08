@@ -1,26 +1,35 @@
 import initWasm from "llguidance-wasm";
-import { ConstraintConfig, JsTokEnv } from "llguidance-wasm";
-import { grm, gen, GrammarNode } from "guidance-ts";
-import {
-  constraintConfig,
-  ConstraintSettings,
-  LLConstraint,
-  JsTokenizer,
-} from "./wrappers.js";
+import { ConstraintConfig } from "llguidance-wasm";
+import { grm, gen, Generation, GenerationOptions } from "guidance-ts";
+import { constraintConfig, LLConstraint } from "./wrappers.js";
 
 import * as webllm from "window-ai-ll-polyfill";
 import { append, mkElt, rootElt, setProgress } from "./chtml.js";
 
-export class WaiSequence {
+export class WaiSequence extends Generation {
   private tokens: number[];
   private ptr = 0;
-  temperature = 0.0;
 
-  constructor(private seq: webllm.AISequence, private ll: LLConstraint) {
+  constructor(
+    private seq: webllm.AISequence,
+    private ll: LLConstraint,
+    options: GenerationOptions
+  ) {
+    super(options);
     this.tokens = Array.from(this.ll.processPrompt());
   }
 
-  async advance() {
+  override async run() {
+    if (this.started) throw new Error("Already started");
+    this.started = true;
+    const maxTokens = this.options.maxTokens ?? 100;
+    for (let i = 0; i < maxTokens; ++i) {
+      if (!(await this.advance())) break;
+    }
+    return;
+  }
+
+  private async advance() {
     const adv = this.seq.advance(this.tokens.slice(this.ptr), 0);
     this.ptr = this.tokens.length;
     const mask = this.ll.samplingMask();
@@ -36,7 +45,7 @@ export class WaiSequence {
     }
     this.tokens.push(...r.tokens);
     for (const res of this.ll.getResults()) {
-      console.log(res);
+      this.handleParserOutput(res);
     }
     return !r.stop;
   }
@@ -75,15 +84,17 @@ export class WaiModel {
     );
   }
 
-  async seq(
-    grammar: GrammarNode,
-    options: webllm.AISequenceOptions
-  ): Promise<WaiSequence> {
+  async generation(options: GenerationOptions): Promise<WaiSequence> {
     await this.init();
-    const c = this.config.new_constraint(JSON.stringify(grammar.serialize()));
+    const c = this.config.new_constraint(
+      JSON.stringify(options.grammar.serialize())
+    );
     const ll = new LLConstraint(c);
-    const seq = await this.ai.createSequence(options);
-    return new WaiSequence(seq, ll);
+    if (options.prompt) {
+      throw new Error("Prompt not implemented");
+    }
+    const seq = await this.ai.createSequence({ messages: options.messages });
+    return new WaiSequence(seq, ll, options);
   }
 }
 
@@ -119,11 +130,12 @@ export async function main() {
   console.log(reply.usage);
 
   const model = new WaiModel(new webllm.AIModel(engine));
-  const gg = grm`2 + 2 = ${gen(/[0-9]+/)}! and 3 + 3 = ${gen(/[0-9]+/)}!`;
-  const seq = await model.seq(gg, {
+  const seq = await model.generation({
+    grammar: grm`2 + 2 = ${gen(/[0-9]+/)}! and 3 + 3 = ${gen(/[0-9]+/)}!`,
     messages: [{ role: "user", content: "Let's do some math!" }],
   });
-  for (let i = 0; i < 20; ++i) {
-    if (!(await seq.advance())) break;
-  }
+  seq.onText = (t) => {
+    console.log(t.str);
+  };
+  await seq.run();
 }
