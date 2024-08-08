@@ -14,7 +14,15 @@ import {
 import { constraintConfig, LLConstraint } from "./wrappers.js";
 
 import * as webllm from "window-ai-ll-polyfill";
-import { append, elt, mkElt, rootElt, setError, setProgress } from "./chtml.js";
+import {
+  append,
+  btn,
+  elt,
+  mkElt,
+  rootElt,
+  setError,
+  setProgress,
+} from "./chtml.js";
 
 export class WaiSequence extends Generation {
   private tokens: number[];
@@ -124,7 +132,7 @@ async function generate() {
   const argNames = ["gen", "select", "grm", "capture", "lexeme", "keyword"];
   let grammar: GrammarNode;
   try {
-    grammar = new Function(...argNames, "return " + gr)(...args);
+    grammar = new Function(...argNames, gr)(...args);
   } catch (e) {
     setError(e.message);
     return;
@@ -132,6 +140,13 @@ async function generate() {
 
   if (!(grammar instanceof GrammarNode)) {
     setError("Not a GrammarNode; use grm`...` at the top-level!");
+    return;
+  }
+
+  try {
+    grammar.serialize();
+  } catch (e) {
+    setError(e.message);
     return;
   }
 
@@ -165,8 +180,56 @@ async function generate() {
 }
 
 export async function main() {
+  loadExample(examples[0]);
+  for (const ex of examples) {
+    const t = ex;
+    append(
+      elt("examples"),
+      btn(ex.name, "", () => {
+        loadExample(t);
+      })
+    );
+  }
+
   elt("generate").addEventListener("click", async (ev) => {
     ev.preventDefault();
     await generate();
   });
 }
+
+interface Example {
+  name: string;
+  user: string;
+  grammar: string;
+}
+
+function loadExample(ex: Example) {
+  (elt("msg-user") as HTMLTextAreaElement).value = ex.user;
+  (elt("grammar") as HTMLTextAreaElement).value = ex.grammar;
+}
+
+const examples = [
+  {
+    name: "Math",
+    user: "Let's do some math!",
+    grammar: 'return grm`2 + 2 = ${gen(/[0-9]+/)}! and 3 + 3 = ${gen(/[0-9]+/)}!`',
+  },
+  {
+    name: "JSON",
+    user: "Please give me a JSON object.",
+    grammar: `const item = gen("item", { listAppend: true, stop: '"' });
+const valid_weapons = ["sword", "bow", "staff"];
+return grm\`
+{
+  "id": "elf",
+  "name": "\${gen("name", { stop: '"' })}",
+  "age": \${gen("age", /[0-9]+/, { stop: "," })},
+  "armor": "\${capture("armor", select("leather", "chainmail", "plate"))}",
+  "weapon": "\${capture("weapon", select(...valid_weapons))}",
+  "class": "\${gen("class", { stop: '"' })}",
+  "mantra": "\${gen("mantra", { stop: '"' })}",
+  "strength": \${gen("strength", /[0-9]+/, { stop: "," })},
+  "items": ["\${item}", "\${item}", "\${item}"]
+}\``,
+  },
+];

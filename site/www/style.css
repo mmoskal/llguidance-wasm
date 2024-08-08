@@ -27,4 +27,10 @@ body {
     padding: 1em;
     border: 1px solid #ccc;
     background-color: #f9f9f9;
+    white-space: pre-wrap;
+}
+
+#examples button {
+    display: inline-block;
+    margin: 0.5em 0.5em;
 }

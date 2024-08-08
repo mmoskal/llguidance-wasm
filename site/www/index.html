@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="./pure-min.css">
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./pure-min.css" />
+    <link rel="stylesheet" href="./style.css" />
     <title>Your App</title>
   </head>
   <body>
@@ -13,30 +13,47 @@
         <fieldset>
           <div class="pure-control-group">
             <label for="msg-user">Message from user to chat bot:</label>
-            <textarea id="msg-user" class="pure-input-1" placeholder="Assistant message">Let's do some math!</textarea>
+            <textarea
+              id="msg-user"
+              class="pure-input-1"
+              placeholder="Assistant message"
+            ></textarea>
             <span class="pure-form-message">Instructions in plain text.</span>
           </div>
 
           <div class="pure-control-group">
             <label for="grammar">Grammar:</label>
-            <textarea id="grammar" spellcheck="false" class="pure-input-1" placeholder="grm`...`">grm`2 + 2 = ${gen(/[0-9]+/)}! and 3 + 3 = ${gen(/[0-9]+/)}!`</textarea>
-            <span class="pure-form-message">It will be eval()ed. You can use gen() and select() functions.</span>
+            <textarea
+              id="grammar"
+              rows="20"
+              spellcheck="false"
+              class="pure-input-1"
+              placeholder="grm`...`"
+            ></textarea>
+            <span class="pure-form-message"
+              >It will be eval()ed. You can use gen() and select()
+              functions.</span
+            >
           </div>
 
           <div class="pure-control-group">
             <label for="grammar">Max tokens:</label>
-            <input id="max-tokens" type="number" value="100">
-          </div>  
+            <input id="max-tokens" type="number" value="100" />
+          </div>
 
-          <button id="generate" class="pure-button pure-button-primary">Generate!</button>
+          <button id="generate" class="pure-button pure-button-primary">
+            Generate!
+          </button>
         </fieldset>
+
+        <div id="examples">Examples:</div>
 
         <div>Output:</div>
         <div id="output"></div>
 
         <div>Stats:</div>
         <div id="stats"></div>
-    </form>
+      </form>
     </div>
     <script type="module">
       import { main } from "./bundle.js";
