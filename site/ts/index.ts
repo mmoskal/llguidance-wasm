@@ -185,6 +185,29 @@ async function generate() {
 
 export async function main() {
   loadExample(examples[0]);
+  setError("");
+  setProgress("");
+
+  const webgpuReport =
+    "Please visit <a href='https://webgpureport.org/'>webgpureport.org</a> to check your system's compatibility.";
+  if (typeof navigator !== "undefined" && navigator.gpu !== void 0) {
+    const adapter = await navigator.gpu.requestAdapter({
+      powerPreference: "high-performance",
+    });
+    if (adapter == null) {
+      setError({
+        html: "Unable to find a compatible GPU. " + webgpuReport,
+      });
+      return;
+    }
+  } else {
+    setError({
+      html: "WebGPU not supported. " + webgpuReport,
+    });
+    return;
+  }
+
+  setProgress("Press 'Generate' to download model and generate text.");
   for (const ex of examples) {
     const t = ex;
     append(

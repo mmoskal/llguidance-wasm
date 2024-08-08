@@ -14,26 +14,27 @@ export function rootElt() {
   return _rootElt;
 }
 
+export type Message = string | { html: string };
+
 export function elt(id: string) {
   const r = document.getElementById(id);
   if (!r) throw new Error(`element ${id} not found`);
   return r;
 }
 
-export function setError(msg: string) {
-  if (!errElt) {
-    errElt = div("error");
-    rootElt().prepend(errElt);
-  }
-  errElt.textContent = msg;
+export function setMessage(id: string, msg: Message) {
+  id = "msg-" + id;
+  elt(id).style.display = msg ? "block" : "none";
+  if (typeof msg == "object") elt(id).innerHTML = msg.html;
+  else elt(id).textContent = msg;
 }
 
-export function setProgress(msg: string) {
-  if (!progressElt) {
-    progressElt = div("progress");
-    rootElt().prepend(progressElt);
-  }
-  progressElt.textContent = msg;
+export function setError(msg: Message) {
+  setMessage("error", msg);
+}
+
+export function setProgress(msg: Message) {
+  setMessage("progress", msg);
 }
 
 export function setupFileDrop(

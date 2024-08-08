@@ -1,40 +1,57 @@
 body {
-    margin: 20px auto;
-    max-width: 1024px;
-    position: relative;
-    min-height: 100vh;
+  margin: 20px auto;
+  max-width: 1024px;
+  position: relative;
+  min-height: 100vh;
 }
 
-.error {
-    color: red;
+#messages {
+  position: fixed;
+  top: 5px;
 }
 
-.progress {
-    background-color: #6aa1cb;
-    padding: 0.5em;
+#messages > div {
+  margin: 0.5em 0;
+  padding: 0.5em;
+  border-radius: 5px;
+}
+
+#msg-error {
+  background-color: #e58686;
+  border: 1px solid rgb(255, 67, 67);
+}
+
+#msg-progress {
+  background-color: #8fccfa;
+  border: 1px solid rgb(68, 68, 255);
 }
 
 #grammar {
-    font-family: monospace;
+  font-family: monospace;
 }
 
 .pure-control-group {
-    margin: 1em 0;
+  margin: 1em 0;
 }
 
-#output, #stats {
-    margin: 1em 0;
-    padding: 1em;
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
-    white-space: pre-wrap;
+#app {
+  margin-top: 80px;
+}
+
+#output,
+#stats {
+  margin: 1em 0;
+  padding: 1em;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  white-space: pre-wrap;
 }
 
 #examples button {
-    display: inline-block;
-    margin: 0.5em 0.5em;
+  display: inline-block;
+  margin: 0.5em 0.5em;
 }
 
 span.generated {
-    background-color: #9dff1c;
+  background-color: #9dff1c;
 }
