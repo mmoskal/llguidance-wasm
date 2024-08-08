@@ -105,13 +105,36 @@ export class WaiModel {
 
   constructor(private ai: webllm.AIModel) {}
 
+  private computeTokenInfo() {
+    // binary format description for all tokens in the tokenizer
+    const nVocab = this.ai.vocabSize;
+    const encoder = new TextEncoder();
+
+    const encodedTokenizer = [];
+    for (let i = 0; i < nVocab; i++) {
+      let bytes = this.ai.tokenBytes(i);
+      let isSpecial = false;
+      if (bytes.length == 0) {
+        isSpecial = true;
+        bytes = encoder.encode(this.ai.tokenName(i));
+      }
+      if (bytes.length > 0xff) {
+        throw new Error(
+          `Token too long: ${JSON.stringify(this.ai.tokenName(i))} at ${i}`
+        );
+      }
+      encodedTokenizer.push(isSpecial ? 0x40 : 0, bytes.length, ...bytes);
+    }
+    return new Uint8Array(encodedTokenizer);
+  }
+
   private async init() {
     if (this.config) return;
 
     await initWasm();
 
     const ai = this.ai;
-    const tokenInfo = await ai.tokenInfo();
+    const tokenInfo = this.computeTokenInfo();
 
     this.config = constraintConfig(
       {
@@ -131,10 +154,6 @@ export class WaiModel {
         fork: false,
       }
     );
-  }
-
-  getStats() {
-    return this.ai._engine.pipeline.curRoundRuntimeStatsText();
   }
 
   async generation(options: GenerationOptions): Promise<WaiSequence> {
@@ -187,12 +206,12 @@ async function generate() {
       {
         initProgressCallback: (progress) => {
           setProgress(progress.text);
-          console.log(progress);
+          // console.log(progress);
         },
       }
     );
 
-    model = new WaiModel(new webllm.AIModel(engine));
+    model = new WaiModel(webllm.createAIModel(engine));
   }
 
   const seq = await model.generation({
@@ -301,7 +320,6 @@ return grm\`
   {
     name: "Poem",
     user: "Write a poem about shouting",
-    grammar:
-      "return grm`${gen(/[a-z \\n]+/, { stop: 'the end', temperature: 0.8 })}`",
+    grammar: "return grm`${gen(/[a-z \\n]+/, { temperature: 0.8 })}`",
   },
 ];

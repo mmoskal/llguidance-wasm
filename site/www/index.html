@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./pure-min.css" />
     <link rel="stylesheet" href="./style.css" />
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <title>llguidance-wasm demo</title>
   </head>
   <body>
@@ -23,14 +23,24 @@
         >
         library compiled to WebAssembly and a bunch of
         <a href="https://github.com/mmoskal/llguidance-wasm">glue code</a>. The
-        llguidance grammars are generated from TypeScript/JavaScript
-        code via <a href="https://github.com/mmoskal/guidance-ts">guidance-ts</a>
+        llguidance grammars are generated from TypeScript/JavaScript code via
+        <a href="https://github.com/mmoskal/guidance-ts">guidance-ts</a>
         library.
       </p>
       <p>
-        To simulate APIs that are not yet available in the browser, the site
-        uses <a href="https://github.com/mlc-ai/web-llm">WebLLM</a>. WebLLM
-        requires a GPU exposed via WebGPU. So far I have tested Edge on Mac M1.
+        To simulate
+        <a
+          href="https://github.com/mmoskal/web-llm/blob/main/src/window_ai_ll_iface.ts"
+          >proposed APIs</a
+        >
+        that are not yet available in the browser, the site uses
+        <a href="https://github.com/mlc-ai/web-llm">WebLLM</a>
+        (see
+        <a
+          href="https://github.com/mmoskal/web-llm/blob/main/src/window_ai_ll.ts"
+          >implementation</a
+        >). WebLLM requires a GPU exposed via WebGPU. It seems to work in Edge
+        on Mac and Windows.
       </p>
       <form class="pure-form pure-form-stacked">
         <fieldset>
