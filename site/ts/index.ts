@@ -22,6 +22,7 @@ import {
   rootElt,
   setError,
   setProgress,
+  text,
 } from "./chtml.js";
 
 export class WaiSequence extends Generation {
@@ -169,9 +170,12 @@ async function generate() {
     messages: [{ role: "user", content: user }],
     maxTokens,
   });
+  elt("output").textContent = "";
   try {
     seq.onText = (t) => {
-      elt("output").textContent = seq.getText();
+      if (!t.str) return;
+      const e = text(t.str, t.is_generated ? "span.generated" : "span.forced");
+      append(elt("output"), e);
     };
     await seq.run();
   } finally {
@@ -212,7 +216,8 @@ const examples = [
   {
     name: "Math",
     user: "Let's do some math!",
-    grammar: 'return grm`2 + 2 = ${gen(/[0-9]+/)}! and 3 + 3 = ${gen(/[0-9]+/)}!`',
+    grammar:
+      "return grm`2 + 2 = ${gen(/[0-9]+/)}! and 3 + 3 = ${gen(/[0-9]+/)}!`",
   },
   {
     name: "JSON",

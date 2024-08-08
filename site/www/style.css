@@ -34,3 +34,7 @@ body {
     display: inline-block;
     margin: 0.5em 0.5em;
 }
+
+span.generated {
+    background-color: #9dff1c;
+}
