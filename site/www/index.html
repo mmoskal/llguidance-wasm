@@ -9,7 +9,34 @@
   </head>
   <body>
     <div id="app">
-      <div id="progress"></div>
+      <form class="pure-form pure-form-stacked">
+        <fieldset>
+          <div class="pure-control-group">
+            <label for="msg-user">Message from user to chat bot:</label>
+            <textarea id="msg-user" class="pure-input-1" placeholder="Assistant message">Let's do some math!</textarea>
+            <span class="pure-form-message">Instructions in plain text.</span>
+          </div>
+
+          <div class="pure-control-group">
+            <label for="grammar">Grammar:</label>
+            <textarea id="grammar" spellcheck="false" class="pure-input-1" placeholder="grm`...`">grm`2 + 2 = ${gen(/[0-9]+/)}! and 3 + 3 = ${gen(/[0-9]+/)}!`</textarea>
+            <span class="pure-form-message">It will be eval()ed. You can use gen() and select() functions.</span>
+          </div>
+
+          <div class="pure-control-group">
+            <label for="grammar">Max tokens:</label>
+            <input id="max-tokens" type="number" value="100">
+          </div>  
+
+          <button id="generate" class="pure-button pure-button-primary">Generate!</button>
+        </fieldset>
+
+        <div>Output:</div>
+        <div id="output"></div>
+
+        <div>Stats:</div>
+        <div id="stats"></div>
+    </form>
     </div>
     <script type="module">
       import { main } from "./bundle.js";

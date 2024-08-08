@@ -1,10 +1,20 @@
 import initWasm from "llguidance-wasm";
 import { ConstraintConfig } from "llguidance-wasm";
-import { grm, gen, Generation, GenerationOptions } from "guidance-ts";
+import {
+  grm,
+  gen,
+  Generation,
+  GenerationOptions,
+  select,
+  capture,
+  lexeme,
+  keyword,
+  GrammarNode,
+} from "guidance-ts";
 import { constraintConfig, LLConstraint } from "./wrappers.js";
 
 import * as webllm from "window-ai-ll-polyfill";
-import { append, mkElt, rootElt, setProgress } from "./chtml.js";
+import { append, elt, mkElt, rootElt, setError, setProgress } from "./chtml.js";
 
 export class WaiSequence extends Generation {
   private tokens: number[];
@@ -27,6 +37,10 @@ export class WaiSequence extends Generation {
       if (!(await this.advance())) break;
     }
     return;
+  }
+
+  destroy(): void {
+    this.seq.destroy();
   }
 
   private async advance() {
@@ -98,44 +112,61 @@ export class WaiModel {
   }
 }
 
-export async function main() {
-  const g = grm`2 + 2 = ${gen(/[0-9]+/)} `;
-  const grmJson = g.serialize();
-  console.log(grmJson);
+let model: WaiModel;
 
-  setProgress("Loading model...");
+async function generate() {
+  setError("");
+  const user = (elt("msg-user") as HTMLTextAreaElement).value;
+  const gr = (elt("grammar") as HTMLTextAreaElement).value;
+  const maxTokens = parseInt((elt("max-tokens") as HTMLInputElement).value);
 
-  const engine = await webllm.CreateMLCEngine(
-    "Phi-3-mini-4k-instruct-q4f16_1-MLC",
-    {
-      initProgressCallback: (progress) => {
-        setProgress(progress.text);
-        console.log(progress);
-      },
-    }
-  );
+  const args = [gen, select, grm, capture, lexeme, keyword];
+  const argNames = ["gen", "select", "grm", "capture", "lexeme", "keyword"];
+  let grammar: GrammarNode;
+  try {
+    grammar = new Function(...argNames, "return " + gr)(...args);
+  } catch (e) {
+    setError(e.message);
+    return;
+  }
 
-  const messages: webllm.ChatCompletionMessageParam[] = [
-    { role: "system", content: "You are a helpful AI assistant." },
-    { role: "user", content: "Hello!" },
-  ];
+  if (!(grammar instanceof GrammarNode)) {
+    setError("Not a GrammarNode; use grm`...` at the top-level!");
+    return;
+  }
 
-  const reply = await engine.chat.completions.create({
-    messages,
-  });
+  if (!model) {
+    const engine = await webllm.CreateMLCEngine(
+      "Phi-3-mini-4k-instruct-q4f16_1-MLC",
+      {
+        initProgressCallback: (progress) => {
+          setProgress(progress.text);
+          console.log(progress);
+        },
+      }
+    );
 
-  append(rootElt(), mkElt("div response", reply.choices[0].message.content));
+    model = new WaiModel(new webllm.AIModel(engine));
+  }
 
-  console.log(reply.choices[0].message);
-  console.log(reply.usage);
-
-  const model = new WaiModel(new webllm.AIModel(engine));
   const seq = await model.generation({
-    grammar: grm`2 + 2 = ${gen(/[0-9]+/)}! and 3 + 3 = ${gen(/[0-9]+/)}!`,
-    messages: [{ role: "user", content: "Let's do some math!" }],
+    grammar: grammar,
+    messages: [{ role: "user", content: user }],
+    maxTokens,
   });
-  seq.onText = (t) => {
-    console.log(t.str);
-  };
-  await seq.run();
+  try {
+    seq.onText = (t) => {
+      elt("output").textContent = seq.getText();
+    };
+    await seq.run();
+  } finally {
+    seq.destroy();
+  }
+}
+
+export async function main() {
+  elt("generate").addEventListener("click", async (ev) => {
+    ev.preventDefault();
+    await generate();
+  });
 }

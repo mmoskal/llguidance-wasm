@@ -14,6 +14,12 @@ export function rootElt() {
   return _rootElt;
 }
 
+export function elt(id: string) {
+  const r = document.getElementById(id);
+  if (!r) throw new Error(`element ${id} not found`);
+  return r;
+}
+
 export function setError(msg: string) {
   if (!errElt) {
     errElt = div("error");

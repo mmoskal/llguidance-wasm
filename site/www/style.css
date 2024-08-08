@@ -8,3 +8,23 @@ body {
 .error {
     color: red;
 }
+
+.progress {
+    background-color: #6aa1cb;
+    padding: 0.5em;
+}
+
+#grammar {
+    font-family: monospace;
+}
+
+.pure-control-group {
+    margin: 1em 0;
+}
+
+#output, #stats {
+    margin: 1em 0;
+    padding: 1em;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+}
