@@ -8,6 +8,7 @@ body {
 #messages {
   position: fixed;
   top: 5px;
+  max-width: 1024px;
 }
 
 #messages > div {
@@ -36,6 +37,7 @@ body {
 
 #app {
   margin-top: 80px;
+  position: relative;
 }
 
 #output,

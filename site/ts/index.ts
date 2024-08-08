@@ -172,6 +172,15 @@ export class WaiModel {
 
 let model: WaiModel;
 
+async function deleteModel() {
+  setProgress("Deleting model...");
+  const keys = await window.caches.keys();
+  for (const key of keys) {
+    await window.caches.delete(key);
+  }
+  setProgress("Model deleted.");
+}
+
 async function generate() {
   setError("");
   const user = (elt("msg-user") as HTMLTextAreaElement).value;
@@ -262,7 +271,7 @@ export async function main() {
 
   if (!(await checkWebGPU())) return;
 
-  setProgress("Press 'Generate' to download model and generate text.");
+  setProgress("Press 'Generate' to download model and generate text");
   for (const ex of examples) {
     const t = ex;
     append(
@@ -276,6 +285,10 @@ export async function main() {
   elt("generate").addEventListener("click", async (ev) => {
     ev.preventDefault();
     await generate();
+  });
+  elt("del-model").addEventListener("click", async (ev) => {
+    ev.preventDefault();
+    await deleteModel();
   });
 }
 
