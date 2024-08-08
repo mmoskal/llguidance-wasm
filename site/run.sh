@@ -24,6 +24,8 @@ ESBUILD="./node_modules/.bin/esbuild
 
 $ESBUILD
 
+if [ "X$NO_WATCH" = "X" ]; then
 $ESBUILD \
     --serve=8042 \
     --servedir=www
+fi

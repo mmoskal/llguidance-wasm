@@ -7,3 +7,4 @@ dist
 site/www/bundle.js
 site/www/bundle.js.map
 site/www/llguidance_wasm_bg.wasm
+site/deploy
