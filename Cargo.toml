@@ -20,7 +20,7 @@ log = "0.4.22"
 console_log = { version = "1.0.0", features = ["color", "wasm-bindgen"] }
 
 [dev-dependencies]
-wasm-bindgen-test = "0.3.34"
+wasm-bindgen-test = "0.3.45"
 
 [profile.release]
 # Tell `rustc` to optimize for small code size.
